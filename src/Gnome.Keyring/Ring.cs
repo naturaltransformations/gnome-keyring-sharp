@@ -1,4 +1,4 @@
-//
+﻿//
 // Gnome.Keyring.Ring.cs
 //
 // Authors:
@@ -388,7 +388,7 @@ namespace Gnome.Keyring {
 		static extern void gnome_keyring_attribute_list_append_uint32 (IntPtr attributes, string name, UInt32 val);
 		[DllImport ("libgnome-keyring.dll")]
 		static extern void gnome_keyring_attribute_list_free (IntPtr attributes);
-		[DllImport ("gnome-keyring-sharp-glue.dll")]
+		[DllImport ("libgnome-keyring-sharp-glue.so")]
 		static extern IntPtr gks_attribute_list_new ();
 
 		public static int CreateItem (string keyring, ItemType type, string displayName, Hashtable attributes,
@@ -529,17 +529,17 @@ namespace Gnome.Keyring {
 
 		[DllImport ("libgnome-keyring.dll")]
 		static extern ResultCode gnome_keyring_item_get_attributes_sync (string keyring, UInt32 id, out IntPtr attributes);
-		[DllImport ("gnome-keyring-sharp-glue.dll")]
+		[DllImport ("libgnome-keyring-sharp-glue.so")]
 		static extern int gks_item_attribute_list_get_length (IntPtr attrList);
-		[DllImport ("gnome-keyring-sharp-glue.dll")]
+		[DllImport ("libgnome-keyring-sharp-glue.so")]
 		static extern bool gks_item_attribute_list_index_is_string (IntPtr attrList, int index);
-		[DllImport("gnome-keyring-sharp-glue.dll")]
+		[DllImport("libgnome-keyring-sharp-glue.so")]
 		static extern bool gks_item_attribute_list_index_is_uint32 (IntPtr attrList, int index);
-		[DllImport ("gnome-keyring-sharp-glue.dll")]
+		[DllImport ("libgnome-keyring-sharp-glue.so")]
 		static extern IntPtr gks_item_attribute_list_get_index_string (IntPtr attrList, int index);
-		[DllImport ("gnome-keyring-sharp-glue.dll")]
+		[DllImport ("libgnome-keyring-sharp-glue.so")]
 		static extern UInt32 gks_item_attribute_list_get_index_uint32 (IntPtr attrList, int index);
-		[DllImport ("gnome-keyring-sharp-glue.dll")]
+		[DllImport ("libgnome-keyring-sharp-glue.so")]
 		static extern IntPtr gks_item_attribute_list_get_index_key (IntPtr attrList, int index);
 
 		public static Hashtable GetItemAttributes (string keyring, int id)
