@@ -252,7 +252,7 @@ namespace Gnome.Keyring {
 				throw new ArgumentNullException ("atts");
 
 			IntPtr passwordList;
-			IntPtr attrList = gks_attribute_list_new ();
+			IntPtr attrList = gnome_keyring_attribute_list_new ();
 
 			NativeListFromAttributes (attrList, atts);
 
@@ -388,15 +388,15 @@ namespace Gnome.Keyring {
 		static extern void gnome_keyring_attribute_list_append_uint32 (IntPtr attributes, string name, UInt32 val);
 		[DllImport ("libgnome-keyring.dll")]
 		static extern void gnome_keyring_attribute_list_free (IntPtr attributes);
-		[DllImport ("libgnome-keyring-sharp-glue.so")]
-		static extern IntPtr gks_attribute_list_new ();
+		[DllImport ("libgnome-keyring.dll")]
+		static extern IntPtr gnome_keyring_attribute_list_new ();
 
 		public static int CreateItem (string keyring, ItemType type, string displayName, Hashtable attributes,
 						string secret, bool updateIfExists)
 		{
 			uint id;
 			IntPtr secure_secret = gnome_keyring_memory_strdup (secret);
-			IntPtr attrs = gks_attribute_list_new ();
+			IntPtr attrs = gnome_keyring_attribute_list_new ();
 
 			NativeListFromAttributes (attrs, attributes);
 
@@ -571,7 +571,7 @@ namespace Gnome.Keyring {
 			if (keyring == null)
 				throw new ArgumentNullException ("keyring");
 
-			IntPtr attrList = gks_attribute_list_new ();
+			IntPtr attrList = gnome_keyring_attribute_list_new ();
 			foreach (string key in atts.Keys) {
 				if (atts[key] is string) {
 					gnome_keyring_attribute_list_append_string (attrList, key, (string)atts[key]);
