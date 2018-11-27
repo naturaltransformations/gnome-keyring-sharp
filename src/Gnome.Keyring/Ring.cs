@@ -220,7 +220,7 @@ namespace Gnome.Keyring {
 
 		static void AttributesFromNativeList (IntPtr attrList, Hashtable attributes)
 		{
-			int listLength = gks_item_attribute_list_get_length (attrList);
+			int listLength = gnome_item_attribute_list_get_length (attrList);
 			for (int i = 0; i < listLength; i++) {
 				string key = Marshal.PtrToStringAnsi (gks_item_attribute_list_get_index_key (attrList, i));
 				if (gks_item_attribute_list_index_is_string (attrList, i)) {
@@ -529,8 +529,21 @@ namespace Gnome.Keyring {
 
 		[DllImport ("libgnome-keyring.dll")]
 		static extern ResultCode gnome_keyring_item_get_attributes_sync (string keyring, UInt32 id, out IntPtr attributes);
-		[DllImport ("libgnome-keyring-sharp-glue.so")]
-		static extern int gks_item_attribute_list_get_length (IntPtr attrList);
+
+        // GnomeKeyringAttributeList is a GArray
+        [StructLayout(LayoutKind.Sequential)]
+        public unsafe struct GArray
+        {
+            public char* data;
+            public uint len;
+        };
+
+        public unsafe static int gnome_item_attribute_list_get_length(IntPtr attrList)
+        {
+            return (int) (*(GArray*)attrList).len;
+        }
+
+
 		[DllImport ("libgnome-keyring-sharp-glue.so")]
 		static extern bool gks_item_attribute_list_index_is_string (IntPtr attrList, int index);
 		[DllImport("libgnome-keyring-sharp-glue.so")]
