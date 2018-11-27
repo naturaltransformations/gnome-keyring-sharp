@@ -37,523 +37,627 @@ using System.Runtime.InteropServices;
 
 using GLib;
 
-namespace Gnome.Keyring {
-	public class Ring {
-		static string appname;
+namespace Gnome.Keyring
+{
+    public class Ring
+    {
+        static string appname;
 
-		private Ring ()
-		{
-		}
+        private Ring()
+        {
+        }
 
-		public static string ApplicationName {
-			get {
-				if (appname == null) {
-					Assembly assembly = Assembly.GetEntryAssembly ();
-					if (assembly == null)
-						throw new Exception ("You need to set Ring.ApplicationName.");
-					appname = assembly.GetName ().Name;
-				}
+        public static string ApplicationName
+        {
+            get
+            {
+                if (appname == null)
+                {
+                    Assembly assembly = Assembly.GetEntryAssembly();
+                    if (assembly == null)
+                        throw new Exception("You need to set Ring.ApplicationName.");
+                    appname = assembly.GetName().Name;
+                }
 
-				return appname;
-			}
+                return appname;
+            }
 
-			set {
-				if (string.IsNullOrEmpty(value))
-					throw new ArgumentException ("Cannot be null or empty", "value");
+            set
+            {
+                if (string.IsNullOrEmpty(value))
+                    throw new ArgumentException("Cannot be null or empty", "value");
 
-				appname = value;
-			}
-		}
+                appname = value;
+            }
+        }
 
-		[DllImport ("libgnome-keyring.dll")]
-		static extern bool gnome_keyring_is_available ();
+        [DllImport("libgnome-keyring.dll")]
+        static extern bool gnome_keyring_is_available();
 
-		public static bool Available {
-			get {
-				return gnome_keyring_is_available ();
-			}
-		}
+        public static bool Available
+        {
+            get
+            {
+                return gnome_keyring_is_available();
+            }
+        }
 
-		[DllImport ("libgnome-keyring.dll")]
-		static extern ResultCode gnome_keyring_lock_all_sync ();
+        [DllImport("libgnome-keyring.dll")]
+        static extern ResultCode gnome_keyring_lock_all_sync();
 
-		public static void LockAll ()
-		{
-			ResultCode result = gnome_keyring_lock_all_sync ();
-			if (result != ResultCode.Ok) {
-				throw new KeyringException (result);
-			}
-		}
+        public static void LockAll()
+        {
+            ResultCode result = gnome_keyring_lock_all_sync();
+            if (result != ResultCode.Ok)
+            {
+                throw new KeyringException(result);
+            }
+        }
 
-		[DllImport ("libgnome-keyring.dll")]
-		static extern ResultCode gnome_keyring_set_default_keyring_sync (string keyring);
+        [DllImport("libgnome-keyring.dll")]
+        static extern ResultCode gnome_keyring_set_default_keyring_sync(string keyring);
 
-		public static void SetDefaultKeyring (string newKeyring)
-		{
-			if (newKeyring == null)
-				throw new ArgumentNullException ("newKeyring");
-			ResultCode result = gnome_keyring_set_default_keyring_sync (newKeyring);
-			if (result != ResultCode.Ok) {
-				throw new KeyringException (result);
-			}
-		}
+        public static void SetDefaultKeyring(string newKeyring)
+        {
+            if (newKeyring == null)
+                throw new ArgumentNullException("newKeyring");
+            ResultCode result = gnome_keyring_set_default_keyring_sync(newKeyring);
+            if (result != ResultCode.Ok)
+            {
+                throw new KeyringException(result);
+            }
+        }
 
-		[DllImport ("libgnome-keyring.dll")]
-		static extern ResultCode gnome_keyring_get_default_keyring_sync (out IntPtr keyring);
+        [DllImport("libgnome-keyring.dll")]
+        static extern ResultCode gnome_keyring_get_default_keyring_sync(out IntPtr keyring);
 
-		public static string GetDefaultKeyring ()
-		{
-			IntPtr keyring_name;
-			ResultCode result = gnome_keyring_get_default_keyring_sync (out keyring_name);
-			if (result != ResultCode.Ok) {
-				throw new KeyringException (result);
-			}
-			return GLib.Marshaller.PtrToStringGFree (keyring_name);
-		}
+        public static string GetDefaultKeyring()
+        {
+            IntPtr keyring_name;
+            ResultCode result = gnome_keyring_get_default_keyring_sync(out keyring_name);
+            if (result != ResultCode.Ok)
+            {
+                throw new KeyringException(result);
+            }
+            return GLib.Marshaller.PtrToStringGFree(keyring_name);
+        }
 
-		[DllImport ("libgnome-keyring.dll")]
-		static extern ResultCode gnome_keyring_list_keyring_names_sync (out IntPtr keyringList);
+        [DllImport("libgnome-keyring.dll")]
+        static extern ResultCode gnome_keyring_list_keyring_names_sync(out IntPtr keyringList);
 
-		[DllImport ("libgnome-keyring.dll")]
-		static extern void gnome_keyring_string_list_free (IntPtr stringList);
+        [DllImport("libgnome-keyring.dll")]
+        static extern void gnome_keyring_string_list_free(IntPtr stringList);
 
-		public static string[] GetKeyrings ()
-		{
-			IntPtr keyring_list;
-			ResultCode result = gnome_keyring_list_keyring_names_sync (out keyring_list);
-			if (result != ResultCode.Ok) {
-				throw new KeyringException (result);
-			}
-			var retval = Marshaller.ListPtrToArray<string>(keyring_list, typeof(GLib.List), false, false);
-			gnome_keyring_string_list_free (keyring_list);
-			return retval;
-		}
+        public static string[] GetKeyrings()
+        {
+            IntPtr keyring_list;
+            ResultCode result = gnome_keyring_list_keyring_names_sync(out keyring_list);
+            if (result != ResultCode.Ok)
+            {
+                throw new KeyringException(result);
+            }
+            var retval = Marshaller.ListPtrToArray<string>(keyring_list, typeof(GLib.List), false, false);
+            gnome_keyring_string_list_free(keyring_list);
+            return retval;
+        }
 
-		[DllImport ("libgnome-keyring.dll")]
-		static extern ResultCode gnome_keyring_create_sync (string keyringName, string password);
+        [DllImport("libgnome-keyring.dll")]
+        static extern ResultCode gnome_keyring_create_sync(string keyringName, string password);
 
-		public static void CreateKeyring (string name, string password)
-		{
-			ResultCode result = gnome_keyring_create_sync (name, password);
-			if (result != ResultCode.Ok) {
-				throw new KeyringException (result);
-			}
-		}
+        public static void CreateKeyring(string name, string password)
+        {
+            ResultCode result = gnome_keyring_create_sync(name, password);
+            if (result != ResultCode.Ok)
+            {
+                throw new KeyringException(result);
+            }
+        }
 
-		[DllImport ("libgnome-keyring.dll")]
-		static extern ResultCode gnome_keyring_lock_sync (string keyring);
+        [DllImport("libgnome-keyring.dll")]
+        static extern ResultCode gnome_keyring_lock_sync(string keyring);
 
-		public static void Lock (string keyring)
-		{
-			if (keyring == null)
-				throw new ArgumentNullException ("keyring");
+        public static void Lock(string keyring)
+        {
+            if (keyring == null)
+                throw new ArgumentNullException("keyring");
 
-			ResultCode result = gnome_keyring_lock_sync (keyring);
-			if (result != ResultCode.Ok) {
-				throw new KeyringException (result);
-			}
-		}
+            ResultCode result = gnome_keyring_lock_sync(keyring);
+            if (result != ResultCode.Ok)
+            {
+                throw new KeyringException(result);
+            }
+        }
 
-		[DllImport ("libgnome-keyring.dll")]
-		static extern ResultCode gnome_keyring_unlock_sync (string keyring, string password);
+        [DllImport("libgnome-keyring.dll")]
+        static extern ResultCode gnome_keyring_unlock_sync(string keyring, string password);
 
-		public static void Unlock (string keyring, string password)
-		{
-			ResultCode result = gnome_keyring_unlock_sync (keyring, password);
+        public static void Unlock(string keyring, string password)
+        {
+            ResultCode result = gnome_keyring_unlock_sync(keyring, password);
 
-			if (!(result == ResultCode.Ok || result == ResultCode.AlreadyUnlocked)) {
-				throw new KeyringException (result);
-			}
-		}
+            if (!(result == ResultCode.Ok || result == ResultCode.AlreadyUnlocked))
+            {
+                throw new KeyringException(result);
+            }
+        }
 
-		[DllImport ("libgnome-keyring.dll")]
-		static extern ResultCode gnome_keyring_delete_sync (string keyring);
+        [DllImport("libgnome-keyring.dll")]
+        static extern ResultCode gnome_keyring_delete_sync(string keyring);
 
-		public static void DeleteKeyring (string keyring)
-		{
-			if (keyring == null)
-				throw new ArgumentNullException ("keyring");
+        public static void DeleteKeyring(string keyring)
+        {
+            if (keyring == null)
+                throw new ArgumentNullException("keyring");
 
-			ResultCode result = gnome_keyring_delete_sync (keyring);
-			if (result != ResultCode.Ok) {
-				throw new KeyringException (result);
-			}
-		}
+            ResultCode result = gnome_keyring_delete_sync(keyring);
+            if (result != ResultCode.Ok)
+            {
+                throw new KeyringException(result);
+            }
+        }
 
-		[DllImport ("libgnome-keyring.dll")]
-		static extern ResultCode gnome_keyring_list_item_ids_sync (string keyring, out IntPtr ids);
+        [DllImport("libgnome-keyring.dll")]
+        static extern ResultCode gnome_keyring_list_item_ids_sync(string keyring, out IntPtr ids);
 
-		public static int[] ListItemIDs (string keyring)
-		{
-			if (keyring == null)
-				throw new ArgumentNullException ("keyring");
+        public static int[] ListItemIDs(string keyring)
+        {
+            if (keyring == null)
+                throw new ArgumentNullException("keyring");
 
-			IntPtr idlist;
-			ResultCode result = gnome_keyring_list_item_ids_sync (keyring, out idlist);
+            IntPtr idlist;
+            ResultCode result = gnome_keyring_list_item_ids_sync(keyring, out idlist);
 
-			if (result != ResultCode.Ok) {
-				throw new KeyringException (result);
-			}
+            if (result != ResultCode.Ok)
+            {
+                throw new KeyringException(result);
+            }
 
-			IntPtr[] ptrArray = Marshaller.ListPtrToArray<IntPtr>(idlist, typeof(GLib.List), true, false);
-			int[] ids = new int[ptrArray.Length];
-			for (int i = 0; i < ptrArray.Length; i++) {
-				ids[i] = ptrArray[i].ToInt32 ();
-			}
+            IntPtr[] ptrArray = Marshaller.ListPtrToArray<IntPtr>(idlist, typeof(GLib.List), true, false);
+            int[] ids = new int[ptrArray.Length];
+            for (int i = 0; i < ptrArray.Length; i++)
+            {
+                ids[i] = ptrArray[i].ToInt32();
+            }
 
-			return ids;
-		}
+            return ids;
+        }
 
 
-		static void NativeListFromAttributes (IntPtr attrList, Hashtable attributes)
-		{
-			foreach (string key in attributes.Keys) {
-				if (attributes[key] is string) {
-					gnome_keyring_attribute_list_append_string (attrList, key, (string)attributes[key]);
-				} else if (attributes[key] is int) {
-					gnome_keyring_attribute_list_append_uint32 (attrList, key, (uint)((int)attributes[key]));
-				} else {
-					throw new ArgumentException (String.Format ("Attribute \"{0}\" has invalid parameter type: {1}", key, attributes[key].GetType ()));
-				}
-			}
-		}
+        static void NativeListFromAttributes(IntPtr attrList, Hashtable attributes)
+        {
+            foreach (string key in attributes.Keys)
+            {
+                if (attributes[key] is string)
+                {
+                    gnome_keyring_attribute_list_append_string(attrList, key, (string)attributes[key]);
+                }
+                else if (attributes[key] is int)
+                {
+                    gnome_keyring_attribute_list_append_uint32(attrList, key, (uint)((int)attributes[key]));
+                }
+                else
+                {
+                    throw new ArgumentException(String.Format("Attribute \"{0}\" has invalid parameter type: {1}", key, attributes[key].GetType()));
+                }
+            }
+        }
 
-		static void AttributesFromNativeList (IntPtr attrList, Hashtable attributes)
-		{
-			int listLength = gnome_item_attribute_list_get_length (attrList);
-			for (int i = 0; i < listLength; i++) {
-				string key = Marshal.PtrToStringAnsi (gks_item_attribute_list_get_index_key (attrList, i));
-				if (gks_item_attribute_list_index_is_string (attrList, i)) {
-					attributes[key] = Marshal.PtrToStringAnsi (gks_item_attribute_list_get_index_string (attrList, i));
-				} else if (gks_item_attribute_list_index_is_uint32 (attrList, i)) {
-					attributes[key] = (int)gks_item_attribute_list_get_index_uint32 (attrList, i);
-				}
-			}
-		}
+        static void AttributesFromNativeList(IntPtr attrList, Hashtable attributes)
+        {
+            int listLength = gnome_item_attribute_list_get_length(attrList);
+            for (int i = 0; i < listLength; i++)
+            {
+                string key = Marshal.PtrToStringAnsi(gks_item_attribute_list_get_index_key(attrList, i));
+                if (gks_item_attribute_list_index_is_string(attrList, i))
+                {
+                    attributes[key] = Marshal.PtrToStringAnsi(gks_item_attribute_list_get_index_string(attrList, i));
+                }
+                else if (gks_item_attribute_list_index_is_uint32(attrList, i))
+                {
+                    attributes[key] = (int)gks_item_attribute_list_get_index_uint32(attrList, i);
+                }
+            }
+        }
 
-		[StructLayout(LayoutKind.Sequential)]
-		struct GnomeKeyringFound
-		{
-			public IntPtr keyring;
-			public UInt32 item_id;
-			public IntPtr attrList;
-			public IntPtr secret;
-		}
+        [StructLayout(LayoutKind.Sequential)]
+        struct GnomeKeyringFound
+        {
+            public IntPtr keyring;
+            public UInt32 item_id;
+            public IntPtr attrList;
+            public IntPtr secret;
+        }
 
-		[DllImport ("libgnome-keyring.dll")]
-		static extern ResultCode gnome_keyring_find_items_sync (ItemType type, IntPtr attrList, out IntPtr foundList);
-		[DllImport ("libgnome-keyring.dll")]
-		static extern void gnome_keyring_found_list_free (IntPtr foundList);
+        [DllImport("libgnome-keyring.dll")]
+        static extern ResultCode gnome_keyring_find_items_sync(ItemType type, IntPtr attrList, out IntPtr foundList);
+        [DllImport("libgnome-keyring.dll")]
+        static extern void gnome_keyring_found_list_free(IntPtr foundList);
 
-		static ItemData [] empty_item_data = new ItemData [0];
-		public static ItemData[] Find (ItemType type, Hashtable atts)
-		{
-			if (atts == null)
-				throw new ArgumentNullException ("atts");
+        static ItemData[] empty_item_data = new ItemData[0];
+        public static ItemData[] Find(ItemType type, Hashtable atts)
+        {
+            if (atts == null)
+                throw new ArgumentNullException("atts");
 
-			IntPtr passwordList;
-			IntPtr attrList = gnome_keyring_attribute_list_new ();
+            IntPtr passwordList;
+            IntPtr attrList = gnome_keyring_attribute_list_new();
 
-			NativeListFromAttributes (attrList, atts);
+            NativeListFromAttributes(attrList, atts);
 
-			ResultCode result = gnome_keyring_find_items_sync (type, attrList, out passwordList);
+            ResultCode result = gnome_keyring_find_items_sync(type, attrList, out passwordList);
 
-			if (result == ResultCode.Denied || result == ResultCode.NoMatch) {
-				return empty_item_data;
-			}
+            if (result == ResultCode.Denied || result == ResultCode.NoMatch)
+            {
+                return empty_item_data;
+            }
 
-			if (result != ResultCode.Ok) {
-				throw new KeyringException (result);
-			}
+            if (result != ResultCode.Ok)
+            {
+                throw new KeyringException(result);
+            }
 
             IntPtr[] passwordStructs = Marshaller.ListPtrToArray<IntPtr>(passwordList, typeof(GLib.List), false, false);
 
-            List<GnomeKeyringFound> passwords = new List<GnomeKeyringFound> ();
+            List<GnomeKeyringFound> passwords = new List<GnomeKeyringFound>();
 
-			foreach (IntPtr ptr in passwordStructs) {
-				passwords.Add ((GnomeKeyringFound)Marshal.PtrToStructure (ptr, typeof(GnomeKeyringFound)));
-			}
+            foreach (IntPtr ptr in passwordStructs)
+            {
+                passwords.Add((GnomeKeyringFound)Marshal.PtrToStructure(ptr, typeof(GnomeKeyringFound)));
+            }
 
-			ArrayList list = new ArrayList ();
-			foreach (var password in passwords) {
-				ItemData found = ItemData.GetInstanceFromItemType (type);
-				found.ItemID = (int)password.item_id;
-				found.Secret = Marshal.PtrToStringAnsi (password.secret);
-				found.Keyring = Marshal.PtrToStringAnsi (password.keyring);
-				found.Attributes = new Hashtable ();
-				AttributesFromNativeList (password.attrList, found.Attributes);
-				found.SetValuesFromAttributes ();
-				list.Add (found);
-			}
+            ArrayList list = new ArrayList();
+            foreach (var password in passwords)
+            {
+                ItemData found = ItemData.GetInstanceFromItemType(type);
+                found.ItemID = (int)password.item_id;
+                found.Secret = Marshal.PtrToStringAnsi(password.secret);
+                found.Keyring = Marshal.PtrToStringAnsi(password.keyring);
+                found.Attributes = new Hashtable();
+                AttributesFromNativeList(password.attrList, found.Attributes);
+                found.SetValuesFromAttributes();
+                list.Add(found);
+            }
 
-			gnome_keyring_found_list_free (passwordList);
-			gnome_keyring_attribute_list_free (attrList);
+            gnome_keyring_found_list_free(passwordList);
+            gnome_keyring_attribute_list_free(attrList);
 
-			return (ItemData []) list.ToArray (typeof (ItemData));
-		}
+            return (ItemData[])list.ToArray(typeof(ItemData));
+        }
 
-		[StructLayout (LayoutKind.Sequential)]
-		struct GnomeKeyringNetworkPasswordData
-		{
-			public IntPtr keyring;
-			public UInt32 item_id;
+        [StructLayout(LayoutKind.Sequential)]
+        struct GnomeKeyringNetworkPasswordData
+        {
+            public IntPtr keyring;
+            public UInt32 item_id;
 
-			public IntPtr protocol;
-			public IntPtr server;
-			public IntPtr @object;
-			public IntPtr authtype;
-			public UInt32 port;
+            public IntPtr protocol;
+            public IntPtr server;
+            public IntPtr @object;
+            public IntPtr authtype;
+            public UInt32 port;
 
-			public IntPtr user;
-			public IntPtr domain;
-			public IntPtr password;
-		}
+            public IntPtr user;
+            public IntPtr domain;
+            public IntPtr password;
+        }
 
-		[DllImport ("libgnome-keyring.dll")]
-		static extern ResultCode gnome_keyring_find_network_password_sync (string user, string domain, string server,
-			string @object, string protocol, string authtype, UInt32 port, out IntPtr passwordList);
+        [DllImport("libgnome-keyring.dll")]
+        static extern ResultCode gnome_keyring_find_network_password_sync(string user, string domain, string server,
+            string @object, string protocol, string authtype, UInt32 port, out IntPtr passwordList);
 
-		static NetItemData [] empty_net_item_data = new NetItemData [0];
-		public static NetItemData[] FindNetworkPassword (string user, string domain, string server, string obj,
-									string protocol, string authtype, int port)
-		{
-			IntPtr passwordList;
+        static NetItemData[] empty_net_item_data = new NetItemData[0];
+        public static NetItemData[] FindNetworkPassword(string user, string domain, string server, string obj,
+                                    string protocol, string authtype, int port)
+        {
+            IntPtr passwordList;
 
-			ResultCode result = gnome_keyring_find_network_password_sync (user, domain, server, obj, protocol, authtype, (uint)port, out passwordList);
+            ResultCode result = gnome_keyring_find_network_password_sync(user, domain, server, obj, protocol, authtype, (uint)port, out passwordList);
 
-			if (result == ResultCode.Denied || result == ResultCode.NoMatch) {
-				return empty_net_item_data;
-			}
+            if (result == ResultCode.Denied || result == ResultCode.NoMatch)
+            {
+                return empty_net_item_data;
+            }
 
-			if (result != ResultCode.Ok) {
-				throw new KeyringException (result);
-			}
+            if (result != ResultCode.Ok)
+            {
+                throw new KeyringException(result);
+            }
 
-			IntPtr[] passwordStructs = Marshaller.ListPtrToArray<IntPtr>(passwordList, typeof(GLib.List), false, false);
-			List<GnomeKeyringNetworkPasswordData> passwords = new List<GnomeKeyringNetworkPasswordData> ();
+            IntPtr[] passwordStructs = Marshaller.ListPtrToArray<IntPtr>(passwordList, typeof(GLib.List), false, false);
+            List<GnomeKeyringNetworkPasswordData> passwords = new List<GnomeKeyringNetworkPasswordData>();
 
-			foreach (IntPtr ptr in passwordStructs) {
-				passwords.Add ((GnomeKeyringNetworkPasswordData)Marshal.PtrToStructure (ptr, typeof(GnomeKeyringNetworkPasswordData)));
-			}
+            foreach (IntPtr ptr in passwordStructs)
+            {
+                passwords.Add((GnomeKeyringNetworkPasswordData)Marshal.PtrToStructure(ptr, typeof(GnomeKeyringNetworkPasswordData)));
+            }
 
-			ArrayList list = new ArrayList ();
-			foreach (var password in passwords) {
-				NetItemData found = new NetItemData ();
-				found.Keyring = Marshal.PtrToStringAnsi (password.keyring);
-				found.ItemID = (int)password.item_id;
-				found.Secret = Marshal.PtrToStringAnsi (password.password);
-				found.Attributes = new Hashtable ();
+            ArrayList list = new ArrayList();
+            foreach (var password in passwords)
+            {
+                NetItemData found = new NetItemData();
+                found.Keyring = Marshal.PtrToStringAnsi(password.keyring);
+                found.ItemID = (int)password.item_id;
+                found.Secret = Marshal.PtrToStringAnsi(password.password);
+                found.Attributes = new Hashtable();
 
-				SetAttributeIfNonNull (found.Attributes, "protocol", password.protocol);
-				SetAttributeIfNonNull (found.Attributes, "server", password.server);
-				SetAttributeIfNonNull (found.Attributes, "object", password.@object);
-				SetAttributeIfNonNull (found.Attributes, "authtype", password.authtype);
-				SetAttributeIfNonNull (found.Attributes, "user", password.user);
-				SetAttributeIfNonNull (found.Attributes, "domain", password.domain);
+                SetAttributeIfNonNull(found.Attributes, "protocol", password.protocol);
+                SetAttributeIfNonNull(found.Attributes, "server", password.server);
+                SetAttributeIfNonNull(found.Attributes, "object", password.@object);
+                SetAttributeIfNonNull(found.Attributes, "authtype", password.authtype);
+                SetAttributeIfNonNull(found.Attributes, "user", password.user);
+                SetAttributeIfNonNull(found.Attributes, "domain", password.domain);
 
-				if (password.port != 0) {
-					found.Attributes["port"] = (int)password.port;
-				}
+                if (password.port != 0)
+                {
+                    found.Attributes["port"] = (int)password.port;
+                }
 
-				found.SetValuesFromAttributes ();
-				list.Add (found);
-			}
+                found.SetValuesFromAttributes();
+                list.Add(found);
+            }
 
-			return (NetItemData []) list.ToArray (typeof (NetItemData));
-		}
+            return (NetItemData[])list.ToArray(typeof(NetItemData));
+        }
 
-		static void SetAttributeIfNonNull (Hashtable attrs, string key, IntPtr maybeString)
-		{
-			if (maybeString != IntPtr.Zero) {
-				attrs[key] = Marshal.PtrToStringAnsi (maybeString);
-			}
-		}
+        static void SetAttributeIfNonNull(Hashtable attrs, string key, IntPtr maybeString)
+        {
+            if (maybeString != IntPtr.Zero)
+            {
+                attrs[key] = Marshal.PtrToStringAnsi(maybeString);
+            }
+        }
 
-		[DllImport ("libgnome-keyring.dll")]
-		static extern ResultCode gnome_keyring_item_create_sync (string keyring,
-			ItemType type,
-			string displayName,
-			IntPtr attributes,
-			IntPtr secret,
-			bool updateIfExists,
-			out UInt32 itemId);
+        [DllImport("libgnome-keyring.dll")]
+        static extern ResultCode gnome_keyring_item_create_sync(string keyring,
+            ItemType type,
+            string displayName,
+            IntPtr attributes,
+            IntPtr secret,
+            bool updateIfExists,
+            out UInt32 itemId);
 
-		[DllImport ("libgnome-keyring.dll")]
-		static extern IntPtr gnome_keyring_memory_strdup (string str);
-		[DllImport ("libgnome-keyring.dll")]
-		static extern void gnome_keyring_memory_free (IntPtr str);
-		[DllImport ("libgnome-keyring.dll")]
-		static extern void gnome_keyring_attribute_list_append_string (IntPtr attributes, string name, string val);
-		[DllImport("libgnome-keyring.dll")]
-		static extern void gnome_keyring_attribute_list_append_uint32 (IntPtr attributes, string name, UInt32 val);
-		[DllImport ("libgnome-keyring.dll")]
-		static extern void gnome_keyring_attribute_list_free (IntPtr attributes);
-		[DllImport ("libgnome-keyring.dll")]
-		static extern IntPtr gnome_keyring_attribute_list_new ();
+        [DllImport("libgnome-keyring.dll")]
+        static extern IntPtr gnome_keyring_memory_strdup(string str);
+        [DllImport("libgnome-keyring.dll")]
+        static extern void gnome_keyring_memory_free(IntPtr str);
+        [DllImport("libgnome-keyring.dll")]
+        static extern void gnome_keyring_attribute_list_append_string(IntPtr attributes, string name, string val);
+        [DllImport("libgnome-keyring.dll")]
+        static extern void gnome_keyring_attribute_list_append_uint32(IntPtr attributes, string name, UInt32 val);
+        [DllImport("libgnome-keyring.dll")]
+        static extern void gnome_keyring_attribute_list_free(IntPtr attributes);
+        [DllImport("libgnome-keyring.dll")]
+        static extern IntPtr gnome_keyring_attribute_list_new();
 
-		public static int CreateItem (string keyring, ItemType type, string displayName, Hashtable attributes,
-						string secret, bool updateIfExists)
-		{
-			uint id;
-			IntPtr secure_secret = gnome_keyring_memory_strdup (secret);
-			IntPtr attrs = gnome_keyring_attribute_list_new ();
+        public static int CreateItem(string keyring, ItemType type, string displayName, Hashtable attributes,
+                        string secret, bool updateIfExists)
+        {
+            uint id;
+            IntPtr secure_secret = gnome_keyring_memory_strdup(secret);
+            IntPtr attrs = gnome_keyring_attribute_list_new();
 
-			NativeListFromAttributes (attrs, attributes);
+            NativeListFromAttributes(attrs, attributes);
 
-			ResultCode result = gnome_keyring_item_create_sync (keyring, type, displayName, attrs, secure_secret, updateIfExists, out id);
+            ResultCode result = gnome_keyring_item_create_sync(keyring, type, displayName, attrs, secure_secret, updateIfExists, out id);
 
-			gnome_keyring_attribute_list_free (attrs);
-			gnome_keyring_memory_free (secure_secret);
+            gnome_keyring_attribute_list_free(attrs);
+            gnome_keyring_memory_free(secure_secret);
 
-			if (result != ResultCode.Ok) {
-				throw new KeyringException (result);
-			}
+            if (result != ResultCode.Ok)
+            {
+                throw new KeyringException(result);
+            }
 
-			return (int)id;
-		}
+            return (int)id;
+        }
 
-		[DllImport ("libgnome-keyring.dll")]
-		static extern ResultCode gnome_keyring_item_delete_sync (string keyring, UInt32 id);
+        [DllImport("libgnome-keyring.dll")]
+        static extern ResultCode gnome_keyring_item_delete_sync(string keyring, UInt32 id);
 
-		public static void DeleteItem (string keyring, int id)
-		{
-			if (keyring == null)
-				throw new ArgumentNullException ("keyring");
+        public static void DeleteItem(string keyring, int id)
+        {
+            if (keyring == null)
+                throw new ArgumentNullException("keyring");
 
-			ResultCode result = gnome_keyring_item_delete_sync (keyring, (uint)id);
+            ResultCode result = gnome_keyring_item_delete_sync(keyring, (uint)id);
 
-			if (result != ResultCode.Ok) {
-				throw new KeyringException (result);
-			}
-		}
+            if (result != ResultCode.Ok)
+            {
+                throw new KeyringException(result);
+            }
+        }
 
-		[DllImport ("libgnome-keyring.dll")]
-		static extern ResultCode gnome_keyring_set_network_password_sync (string keyring,
-			string user,
-			string domain,
-			string server,
-			string @object,
-			string protocol,
-			string authType,
-			UInt32 port,
-			string password,
-			out UInt32 id);
+        [DllImport("libgnome-keyring.dll")]
+        static extern ResultCode gnome_keyring_set_network_password_sync(string keyring,
+            string user,
+            string domain,
+            string server,
+            string @object,
+            string protocol,
+            string authType,
+            UInt32 port,
+            string password,
+            out UInt32 id);
 
-		public static int CreateOrModifyNetworkPassword (string keyring, string user, string domain, string server, string obj,
-								string protocol, string authtype, int port, string password)
-		{
-			uint id;
-			ResultCode result = gnome_keyring_set_network_password_sync (keyring, user, domain, server, obj, protocol, authtype, (uint)port, password, out id);
+        public static int CreateOrModifyNetworkPassword(string keyring, string user, string domain, string server, string obj,
+                                string protocol, string authtype, int port, string password)
+        {
+            uint id;
+            ResultCode result = gnome_keyring_set_network_password_sync(keyring, user, domain, server, obj, protocol, authtype, (uint)port, password, out id);
 
-			if (result != ResultCode.Ok) {
-				throw new KeyringException (result);
-			}
+            if (result != ResultCode.Ok)
+            {
+                throw new KeyringException(result);
+            }
 
-			return (int)id;
-		}
+            return (int)id;
+        }
 
-		[DllImport ("libgnome-keyring.dll")]
-		static extern ResultCode gnome_keyring_item_get_info_sync (string keyring, UInt32 id, out IntPtr itemInfo);
-		[DllImport ("libgnome-keyring.dll")]
-		static extern ItemType gnome_keyring_item_info_get_type (IntPtr itemInfo);
-		[DllImport("libgnome-keyring.dll")]
-		static extern IntPtr gnome_keyring_item_info_get_ctime (IntPtr itemInfo);
-		[DllImport("libgnome-keyring.dll")]
-		static extern IntPtr gnome_keyring_item_info_get_mtime (IntPtr itemInfo);
-		[DllImport("libgnome-keyring.dll")]
-		static extern IntPtr gnome_keyring_item_info_get_display_name (IntPtr itemInfo);
-		[DllImport("libgnome-keyring.dll")]
-		static extern IntPtr gnome_keyring_item_info_get_secret (IntPtr itemInfo);
-		[DllImport("libgnome-keyring.dll")]
-		static extern void gnome_keyring_item_info_free (IntPtr itemInfo);
+        [DllImport("libgnome-keyring.dll")]
+        static extern ResultCode gnome_keyring_item_get_info_sync(string keyring, UInt32 id, out IntPtr itemInfo);
+        [DllImport("libgnome-keyring.dll")]
+        static extern ItemType gnome_keyring_item_info_get_type(IntPtr itemInfo);
+        [DllImport("libgnome-keyring.dll")]
+        static extern IntPtr gnome_keyring_item_info_get_ctime(IntPtr itemInfo);
+        [DllImport("libgnome-keyring.dll")]
+        static extern IntPtr gnome_keyring_item_info_get_mtime(IntPtr itemInfo);
+        [DllImport("libgnome-keyring.dll")]
+        static extern IntPtr gnome_keyring_item_info_get_display_name(IntPtr itemInfo);
+        [DllImport("libgnome-keyring.dll")]
+        static extern IntPtr gnome_keyring_item_info_get_secret(IntPtr itemInfo);
+        [DllImport("libgnome-keyring.dll")]
+        static extern void gnome_keyring_item_info_free(IntPtr itemInfo);
 
-		public static ItemData GetItemInfo (string keyring, int id)
-		{
-			if (keyring == null)
-				throw new ArgumentNullException ("keyring");
+        public static ItemData GetItemInfo(string keyring, int id)
+        {
+            if (keyring == null)
+                throw new ArgumentNullException("keyring");
 
-			IntPtr itemInfo;
+            IntPtr itemInfo;
 
-			ResultCode result = gnome_keyring_item_get_info_sync (keyring, (uint)id, out itemInfo);
+            ResultCode result = gnome_keyring_item_get_info_sync(keyring, (uint)id, out itemInfo);
 
-			if (result != ResultCode.Ok) {
-				throw new KeyringException (result);
-			}
+            if (result != ResultCode.Ok)
+            {
+                throw new KeyringException(result);
+            }
 
-			ItemData item = ItemData.GetInstanceFromItemType (gnome_keyring_item_info_get_type (itemInfo));
-			item.Attributes = new Hashtable ();
-			item.Attributes["keyring_ctime"] = GLib.Marshaller.time_tToDateTime (gnome_keyring_item_info_get_ctime (itemInfo));
-			item.Attributes["keyring_mtime"] = GLib.Marshaller.time_tToDateTime (gnome_keyring_item_info_get_mtime (itemInfo));
-			item.Attributes["name"] = Marshal.PtrToStringAnsi (gnome_keyring_item_info_get_display_name (itemInfo));
+            ItemData item = ItemData.GetInstanceFromItemType(gnome_keyring_item_info_get_type(itemInfo));
+            item.Attributes = new Hashtable();
+            item.Attributes["keyring_ctime"] = GLib.Marshaller.time_tToDateTime(gnome_keyring_item_info_get_ctime(itemInfo));
+            item.Attributes["keyring_mtime"] = GLib.Marshaller.time_tToDateTime(gnome_keyring_item_info_get_mtime(itemInfo));
+            item.Attributes["name"] = Marshal.PtrToStringAnsi(gnome_keyring_item_info_get_display_name(itemInfo));
 
-			item.Keyring = keyring;
-			item.ItemID = id;
-			item.Secret = Marshal.PtrToStringAnsi (gnome_keyring_item_info_get_secret (itemInfo));
+            item.Keyring = keyring;
+            item.ItemID = id;
+            item.Secret = Marshal.PtrToStringAnsi(gnome_keyring_item_info_get_secret(itemInfo));
 
-			item.SetValuesFromAttributes ();
+            item.SetValuesFromAttributes();
 
-			gnome_keyring_item_info_free (itemInfo);
+            gnome_keyring_item_info_free(itemInfo);
 
-			return item;
-		}
+            return item;
+        }
 
-		[DllImport ("libgnome-keyring.dll")]
-		static extern ResultCode gnome_keyring_item_set_info_sync (string keyring, UInt32 id, IntPtr itemInfo);
-		[DllImport ("libgnome-keyring.dll")]
-		static extern IntPtr gnome_keyring_item_info_new ();
-		[DllImport ("libgnome-keyring.dll")]
-		static extern void gnome_keyring_item_info_set_display_name (IntPtr itemInfo, string displayName);
-		[DllImport("libgnome-keyring.dll")]
-		static extern void gnome_keyring_item_info_set_type (IntPtr itemInfo, ItemType type);
-		[DllImport("libgnome-keyring.dll")]
-		static extern void gnome_keyring_item_info_set_secret (IntPtr itemInfo, string secret);
+        [DllImport("libgnome-keyring.dll")]
+        static extern ResultCode gnome_keyring_item_set_info_sync(string keyring, UInt32 id, IntPtr itemInfo);
+        [DllImport("libgnome-keyring.dll")]
+        static extern IntPtr gnome_keyring_item_info_new();
+        [DllImport("libgnome-keyring.dll")]
+        static extern void gnome_keyring_item_info_set_display_name(IntPtr itemInfo, string displayName);
+        [DllImport("libgnome-keyring.dll")]
+        static extern void gnome_keyring_item_info_set_type(IntPtr itemInfo, ItemType type);
+        [DllImport("libgnome-keyring.dll")]
+        static extern void gnome_keyring_item_info_set_secret(IntPtr itemInfo, string secret);
 
-		public static void SetItemInfo (string keyring, int id, ItemType type, string displayName, string secret)
-		{
-			if (keyring == null)
-				throw new ArgumentNullException ("keyring");
+        public static void SetItemInfo(string keyring, int id, ItemType type, string displayName, string secret)
+        {
+            if (keyring == null)
+                throw new ArgumentNullException("keyring");
 
-			IntPtr itemInfo = gnome_keyring_item_info_new ();
-			gnome_keyring_item_info_set_display_name (itemInfo, displayName);
-			gnome_keyring_item_info_set_type (itemInfo, type);
-			gnome_keyring_item_info_set_secret (itemInfo, secret);
+            IntPtr itemInfo = gnome_keyring_item_info_new();
+            gnome_keyring_item_info_set_display_name(itemInfo, displayName);
+            gnome_keyring_item_info_set_type(itemInfo, type);
+            gnome_keyring_item_info_set_secret(itemInfo, secret);
 
-			ResultCode result = gnome_keyring_item_set_info_sync (keyring, (uint)id, itemInfo);
+            ResultCode result = gnome_keyring_item_set_info_sync(keyring, (uint)id, itemInfo);
 
-			gnome_keyring_item_info_free (itemInfo);
+            gnome_keyring_item_info_free(itemInfo);
 
-			if (result != ResultCode.Ok) {
-				throw new KeyringException (result);
-			}
-		}
+            if (result != ResultCode.Ok)
+            {
+                throw new KeyringException(result);
+            }
+        }
 
-		[DllImport ("libgnome-keyring.dll")]
-		static extern ResultCode gnome_keyring_item_get_attributes_sync (string keyring, UInt32 id, out IntPtr attributes);
+        [DllImport("libgnome-keyring.dll")]
+        static extern ResultCode gnome_keyring_item_get_attributes_sync(string keyring, UInt32 id, out IntPtr attributes);
 
         // GnomeKeyringAttributeList is a GArray
         [StructLayout(LayoutKind.Sequential)]
-        public unsafe struct GArray
+        public struct GArray
         {
-            public char* data;
-            public uint len;
+            public IntPtr data;
+            public UInt32 len;
         };
 
-        public unsafe static int gnome_item_attribute_list_get_length(IntPtr attrList)
+        public enum GnomeKeyringAttributeType : uint
+        {
+            GNOME_KEYRING_ATTRIBUTE_TYPE_STRING,
+            GNOME_KEYRING_ATTRIBUTE_TYPE_UINT32
+        }
+
+
+        /*
+         * C# struct corresponding to the C struct.
+         * 
+         * IntPtr is used to represent the union
+         * 
+         * union {
+         *      char* string; // 8 bytes or 4bytes
+         *      guint32 integer; // 4 bytes
+         *  } value
+         * 
+         * This works since IntPtr is 4 or 8 bytes according to
+         * PlatformTarget.
+         * 
+         */
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct GnomeKeyringAttribute
+        {
+            public IntPtr name;
+            public GnomeKeyringAttributeType type;
+
+            public UInt32 ValueInteger
+            {
+                get {
+                    return (UInt32) ValueString;
+                }
+            }
+
+            public IntPtr ValueString { get; }
+        }
+
+        private unsafe static int gnome_item_attribute_list_get_length(IntPtr attrList)
         {
             return (int) (*(GArray*)attrList).len;
         }
 
+        //#define gnome_keyring_attribute_list_index(a, i) g_array_index ((a), GnomeKeyringAttribute, (i))
+        // g_array_index  Returns the element of a GArray at the given index.The return value is cast to the given type.
 
-		[DllImport ("libgnome-keyring-sharp-glue.so")]
-		static extern bool gks_item_attribute_list_index_is_string (IntPtr attrList, int index);
-		[DllImport("libgnome-keyring-sharp-glue.so")]
-		static extern bool gks_item_attribute_list_index_is_uint32 (IntPtr attrList, int index);
-		[DllImport ("libgnome-keyring-sharp-glue.so")]
-		static extern IntPtr gks_item_attribute_list_get_index_string (IntPtr attrList, int index);
-		[DllImport ("libgnome-keyring-sharp-glue.so")]
-		static extern UInt32 gks_item_attribute_list_get_index_uint32 (IntPtr attrList, int index);
-		[DllImport ("libgnome-keyring-sharp-glue.so")]
-		static extern IntPtr gks_item_attribute_list_get_index_key (IntPtr attrList, int index);
+        private unsafe static GnomeKeyringAttribute gnome_keyring_attribute_list_index(IntPtr attrList, Int32 index)
+        {
+            return ((GnomeKeyringAttribute*) (*(GArray*)attrList).data)[index];
+        }
+
+        public static bool gks_item_attribute_list_index_is_string(IntPtr attrList, Int32 index)
+        {
+            return gnome_keyring_attribute_list_index(attrList, index).type == GnomeKeyringAttributeType.GNOME_KEYRING_ATTRIBUTE_TYPE_STRING;
+        }
+
+
+        private static bool gks_item_attribute_list_index_is_uint32(IntPtr attrList, int index)
+        {
+            return gnome_keyring_attribute_list_index(attrList, index).type == GnomeKeyringAttributeType.GNOME_KEYRING_ATTRIBUTE_TYPE_UINT32;
+        }
+
+        private static IntPtr gks_item_attribute_list_get_index_string(IntPtr attrList, int index)
+        {
+            return gnome_keyring_attribute_list_index(attrList, index).ValueString;
+        }
+
+        private static UInt32 gks_item_attribute_list_get_index_uint32(IntPtr attrList, int index)
+        {
+            return gnome_keyring_attribute_list_index(attrList, index).ValueInteger;
+        }
+
+
+        private static IntPtr gks_item_attribute_list_get_index_key(IntPtr attrList, int index)
+        {
+            return gnome_keyring_attribute_list_index(attrList, index).name;
+        }
 
 		public static Hashtable GetItemAttributes (string keyring, int id)
 		{
