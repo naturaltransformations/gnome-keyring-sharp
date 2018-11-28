@@ -50,25 +50,15 @@
   <ItemGroup>
     <None Include="src\Gnome.Keyring\AssemblyInfo.cs.in" />
     <None Include="src\Gnome.Keyring\Makefile.am" />
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="glib-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
-      <Package>glib-sharp-2.0</Package>
-    </Reference>
+    <Reference Include="glib-sharp"/>
     <Reference Include="Mono.Posix" />
     <Reference Include="System.Core" />
-    <Reference Include="nunit.framework">
-      <HintPath>packages\NUnit.3.11.0\lib\net35\nunit.framework.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="NDesk.DBus">
-      <HintPath>packages\NDesk.DBus.0.15.0\lib\NDesk.DBus.dll</HintPath>
-    </Reference>
+    <Reference Include="nunit.framework"/>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Tests\" />
   </ItemGroup>
-  <Import Project="packages\NDesk.DBus.0.15.0\build\NDesk.DBus.targets" Condition="Exists('packages\NDesk.DBus.0.15.0\build\NDesk.DBus.targets')" />
 </Project>
