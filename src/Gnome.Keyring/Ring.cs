@@ -349,8 +349,7 @@ namespace Gnome.Keyring
 
         public static string GetDefaultKeyring()
         {
-            IntPtr keyring_name;
-            ResultCode result = LibGnomeImports.gnome_keyring_get_default_keyring_sync(out keyring_name);
+            ResultCode result = LibGnomeImports.gnome_keyring_get_default_keyring_sync(out IntPtr keyring_name);
             if (result != ResultCode.Ok)
             {
                 throw new KeyringException(result);
@@ -360,8 +359,7 @@ namespace Gnome.Keyring
 
         public static string[] GetKeyrings()
         {
-            IntPtr keyring_list;
-            ResultCode result = LibGnomeImports.gnome_keyring_list_keyring_names_sync(out keyring_list);
+            ResultCode result = LibGnomeImports.gnome_keyring_list_keyring_names_sync(out IntPtr keyring_list);
             if (result != ResultCode.Ok)
             {
                 throw new KeyringException(result);
@@ -423,8 +421,7 @@ namespace Gnome.Keyring
             if (keyring == null)
                 throw new ArgumentNullException("keyring");
 
-            IntPtr idlist;
-            ResultCode result = LibGnomeImports.gnome_keyring_list_item_ids_sync(keyring, out idlist);
+            ResultCode result = LibGnomeImports.gnome_keyring_list_item_ids_sync(keyring, out IntPtr idlist);
 
             if (result != ResultCode.Ok)
             {
@@ -488,19 +485,18 @@ namespace Gnome.Keyring
         }
 
 
-        static ItemData[] empty_item_data = new ItemData[0];
+        static readonly ItemData[] empty_item_data = new ItemData[0];
 
         public static ItemData[] Find(ItemType type, Hashtable atts)
         {
             if (atts == null)
                 throw new ArgumentNullException("atts");
 
-            IntPtr passwordList;
             IntPtr attrList = LibGnomeImports.gnome_keyring_attribute_list_new();
 
             NativeListFromAttributes(attrList, atts);
 
-            ResultCode result = LibGnomeImports.gnome_keyring_find_items_sync(type, attrList, out passwordList);
+            ResultCode result = LibGnomeImports.gnome_keyring_find_items_sync(type, attrList, out IntPtr passwordList);
 
             if (result == ResultCode.Denied || result == ResultCode.NoMatch)
             {
@@ -557,14 +553,11 @@ namespace Gnome.Keyring
             public IntPtr password;
         }
 
-
-        static NetItemData[] empty_net_item_data = new NetItemData[0];
+        static readonly NetItemData[] empty_net_item_data = new NetItemData[0];
         public static NetItemData[] FindNetworkPassword(string user, string domain, string server, string obj,
                                     string protocol, string authtype, int port)
         {
-            IntPtr passwordList;
-
-            ResultCode result = LibGnomeImports.gnome_keyring_find_network_password_sync(user, domain, server, obj, protocol, authtype, (uint)port, out passwordList);
+            ResultCode result = LibGnomeImports.gnome_keyring_find_network_password_sync(user, domain, server, obj, protocol, authtype, (uint)port, out IntPtr passwordList);
 
             if (result == ResultCode.Denied || result == ResultCode.NoMatch)
             {
@@ -624,13 +617,12 @@ namespace Gnome.Keyring
         public static int CreateItem(string keyring, ItemType type, string displayName, Hashtable attributes,
                         string secret, bool updateIfExists)
         {
-            uint id;
             IntPtr secure_secret = LibGnomeImports.gnome_keyring_memory_strdup(secret);
             IntPtr attrs = LibGnomeImports.gnome_keyring_attribute_list_new();
 
             NativeListFromAttributes(attrs, attributes);
 
-            ResultCode result = LibGnomeImports.gnome_keyring_item_create_sync(keyring, type, displayName, attrs, secure_secret, updateIfExists, out id);
+            ResultCode result = LibGnomeImports.gnome_keyring_item_create_sync(keyring, type, displayName, attrs, secure_secret, updateIfExists, out uint id);
 
             LibGnomeImports.gnome_keyring_attribute_list_free(attrs);
             LibGnomeImports.gnome_keyring_memory_free(secure_secret);
@@ -661,8 +653,7 @@ namespace Gnome.Keyring
         public static int CreateOrModifyNetworkPassword(string keyring, string user, string domain, string server, string obj,
                                 string protocol, string authtype, int port, string password)
         {
-            uint id;
-            ResultCode result = LibGnomeImports.gnome_keyring_set_network_password_sync(keyring, user, domain, server, obj, protocol, authtype, (uint)port, password, out id);
+            ResultCode result = LibGnomeImports.gnome_keyring_set_network_password_sync(keyring, user, domain, server, obj, protocol, authtype, (uint)port, password, out uint id);
 
             if (result != ResultCode.Ok)
             {
@@ -678,9 +669,7 @@ namespace Gnome.Keyring
             if (keyring == null)
                 throw new ArgumentNullException("keyring");
 
-            IntPtr itemInfo;
-
-            ResultCode result = LibGnomeImports.gnome_keyring_item_get_info_sync(keyring, (uint)id, out itemInfo);
+            ResultCode result = LibGnomeImports.gnome_keyring_item_get_info_sync(keyring, (uint)id, out IntPtr itemInfo);
 
             if (result != ResultCode.Ok)
             {
@@ -688,10 +677,12 @@ namespace Gnome.Keyring
             }
 
             ItemData item = ItemData.GetInstanceFromItemType(LibGnomeImports.gnome_keyring_item_info_get_type(itemInfo));
-            item.Attributes = new Hashtable();
-            item.Attributes["keyring_ctime"] = GLib.Marshaller.time_tToDateTime(LibGnomeImports.gnome_keyring_item_info_get_ctime(itemInfo));
-            item.Attributes["keyring_mtime"] = GLib.Marshaller.time_tToDateTime(LibGnomeImports.gnome_keyring_item_info_get_mtime(itemInfo));
-            item.Attributes["name"] = Marshal.PtrToStringAnsi(LibGnomeImports.gnome_keyring_item_info_get_display_name(itemInfo));
+            item.Attributes = new Hashtable
+            {
+                ["keyring_ctime"] = GLib.Marshaller.time_tToDateTime(LibGnomeImports.gnome_keyring_item_info_get_ctime(itemInfo)),
+                ["keyring_mtime"] = GLib.Marshaller.time_tToDateTime(LibGnomeImports.gnome_keyring_item_info_get_mtime(itemInfo)),
+                ["name"] = Marshal.PtrToStringAnsi(LibGnomeImports.gnome_keyring_item_info_get_display_name(itemInfo))
+            };
 
             item.Keyring = keyring;
             item.ItemID = id;
@@ -730,10 +721,9 @@ namespace Gnome.Keyring
 			if (keyring == null)
 				throw new ArgumentNullException ("keyring");
 
-			IntPtr attributes;
-			Hashtable retVal = new Hashtable ();
+            Hashtable retVal = new Hashtable();
 
-			ResultCode result = LibGnomeImports.gnome_keyring_item_get_attributes_sync (keyring, (uint)id, out attributes);
+            ResultCode result = LibGnomeImports.gnome_keyring_item_get_attributes_sync (keyring, (uint)id, out IntPtr attributes);
 
 			if (result != ResultCode.Ok) {
 				throw new KeyringException (result);
@@ -773,8 +763,6 @@ namespace Gnome.Keyring
 		}
 
 
-
-
         public static KeyringInfo GetKeyringInfo (string keyring)
 		{
 			if (keyring == null)
@@ -811,11 +799,9 @@ namespace Gnome.Keyring
 			if (info == null)
 				throw new ArgumentNullException ("info");
 
+            ResultCode result = LibGnomeImports.gnome_keyring_get_info_sync(keyring, out IntPtr keyring_info);
 
-			IntPtr keyring_info;
-			ResultCode result = LibGnomeImports.gnome_keyring_get_info_sync (keyring, out keyring_info);
-
-			if (result != ResultCode.Ok) {
+            if (result != ResultCode.Ok) {
 				throw new KeyringException (result);
 			}
 
