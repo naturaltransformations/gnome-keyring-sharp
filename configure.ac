@@ -1,6 +1,8 @@
 AC_PREREQ(2.57)
-AC_INIT(src/Gnome.Keyring/Ring.cs)
+AC_INIT([gnome-keyring-sharp], [1.2])
 AC_CANONICAL_SYSTEM
+AC_CONFIG_SRCDIR([src/Gnome.Keyring/Ring.cs])
+AM_INIT_AUTOMAKE([foreign])
 
 AC_PROG_CC
 AC_PROG_LIBTOOL
@@ -11,7 +13,6 @@ VERSION=$API_VERSION.2
 AC_SUBST(API_VERSION)
 AC_SUBST(VERSION)
 
-AM_INIT_AUTOMAKE(gnome-keyring-sharp, $VERSION)
 AM_MAINTAINER_MODE
 
 AC_PROG_INSTALL
@@ -90,7 +91,6 @@ AC_OUTPUT([
 	src/gnome-keyring-sharp-1.0.pc
 	src/Gnome.Keyring/Makefile
 	src/Gnome.Keyring/AssemblyInfo.cs
-	gnome-keyring-sharp-glue/Makefile
 	docs/Makefile
 	sample/Makefile
 ])
