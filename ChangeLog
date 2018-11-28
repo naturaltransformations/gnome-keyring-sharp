@@ -1,3 +1,28 @@
+2018-11-28 Hendrik Verhoek <hendrik@natural-transformations.com>
+	* 8e9c203 Made explicit that the license is MIT.
+	* 635f728 Fixed unit tests with exceptions.
+	* 65e92cf Moving remaining structs in internal private class.
+	* 962acf4 Mostly inlining variables.
+	* 2c9232a Public sign our assemblies ((https://github.com/dotnet/cli/issues/6911).
+	* 60068f4 Removing c wrapper files from the build process.
+	* 868f8fc Update autoconf config and make it work without a NEWS file.
+	* 884034a Removal of obsolete c wrapper files.
+	* 52c67cb Project and package clean-up.
+	* 6ffebb4 Our very unsafe code is to be allowed.
+	* 5088d9a Packaged libgnomedll imports in a private static class to not expose them in our public api.
+	* 6dbd614 Added remaining C functions from glue.c to Ring.cs.
+	* a8ad496 Removed gks_item_attribute_list_get_length in favour of gnome_item_attribute_list_get_length.
+	* 9992f1e Removal of gks_attribute_list_new in favour of invoking gnome_keyring_attribute_list_new directly.
+	* 82ffc49 Substituted dll file by shared object.
+	* cd9686c Removal of unused imports.
+	* 120369f Changed deprecated ListPtrToArray call to its newer generic version.
+	* c92ea5a Commented out deprecated code that will be fixed later.
+	* 460c33e Updated project file.
+	* 93bf3cc Removing unsupported sub cproj from solution file.
+
+	Fixed build process, dependencies etc. to today's standards. Removed C wrappers in favour of directly
+	accessing glib objects in C#, mainly due to inability to build cproj files. Fixed unit tests.
+
 2010-06-30 Gonzalo Paniagua Javier <gonzalo@novell.com>
 
 	* src/Gnome.Keyring/RequestMessage.cs: Removed file.
