@@ -103,10 +103,9 @@ namespace Gnome.Keyring
 		}
 		
 		[Test()]
-		//[ExpectedException (ExpectedMessage = "No such keyring", ExceptionType = typeof (KeyringException))]
 		public void SetDefaultKeyringWithInvalidKeyringRaisesException ()
 		{
-			Ring.SetDefaultKeyring ("Keyring That Doesn't Exist");
+            Assert.Throws<KeyringException>(() => Ring.SetDefaultKeyring ("Keyring That Doesn't Exist"), "No such keyring");
 		}
 		
 		[Test()]
@@ -120,17 +119,13 @@ namespace Gnome.Keyring
 		}
 		
 		[Test()]
-		//[ExpectedException (ExpectedMessage = "Item already exists", ExceptionType = typeof (KeyringException))]
 		public void CreatingTheSameKeyringTwiceRaisesException ()
 		{
 			string keyringName = "anothertestkeyring";
 			Ring.CreateKeyring (keyringName, "password");
-			try {
-				Ring.CreateKeyring (keyringName, "password");
-			} finally {
-				Ring.DeleteKeyring (keyringName);
-			}
-		}
+            Assert.Throws<KeyringException>(() => Ring.CreateKeyring(keyringName, "password"), "Item already exists");
+            Ring.DeleteKeyring(keyringName);
+        }
 		
 		[Test()]
 		public void RemovingKeyringRemovesItFromKeyringList ()
