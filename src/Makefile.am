@@ -5,7 +5,7 @@ ASSEMBLY=$(ASSEMBLY_NAME).dll
 SNK=$(ASSEMBLY_NAME).snk
 
 pkgconfigdir=$(libdir)/pkgconfig
-CSFLAGS += -debug+ -debug:full -nologo -r:Mono.Posix.dll
+CSFLAGS += -publicsign+ -keyfile:$(SNK) -unsafe+ -debug+ -debug:full -nologo -r:Mono.Posix.dll
 
 pkgconfig_DATA = gnome-keyring-sharp-1.0.pc
 
