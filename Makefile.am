@@ -1,2 +1,2 @@
-SUBDIRS=src gnome-keyring-sharp-glue docs sample
+SUBDIRS=src docs sample
 EXTRA_DIST=Gnome.Keyring.snk
