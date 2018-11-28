@@ -17,8 +17,8 @@ When the gnome-keyring-daemon is running, you can use this library to retrieve/s
 confidential information such as passwords, notes or network services user information
 from your csharp application.
 
-* Directory Layout
-------------------
+Directory Layout
+----------------
 	docs/
 		Monodoc documentation for the library
 
