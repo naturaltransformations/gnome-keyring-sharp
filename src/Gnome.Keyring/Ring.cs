@@ -252,6 +252,33 @@ namespace Gnome.Keyring
                 public IntPtr ValueString { get; }
             }
 
+
+            [StructLayout(LayoutKind.Sequential)]
+            public struct GnomeKeyringFound
+            {
+                public IntPtr keyring;
+                public UInt32 item_id;
+                public IntPtr attrList;
+                public IntPtr secret;
+            }
+
+            [StructLayout(LayoutKind.Sequential)]
+            public struct GnomeKeyringNetworkPasswordData
+            {
+                public IntPtr keyring;
+                public UInt32 item_id;
+
+                public IntPtr protocol;
+                public IntPtr server;
+                public IntPtr @object;
+                public IntPtr authtype;
+                public UInt32 port;
+
+                public IntPtr user;
+                public IntPtr domain;
+                public IntPtr password;
+            }
+
             public unsafe static int gnome_item_attribute_list_get_length(IntPtr attrList)
             {
                 return (int)(*(GArray*)attrList).len;
@@ -475,16 +502,6 @@ namespace Gnome.Keyring
             }
         }
 
-        [StructLayout(LayoutKind.Sequential)]
-        struct GnomeKeyringFound
-        {
-            public IntPtr keyring;
-            public UInt32 item_id;
-            public IntPtr attrList;
-            public IntPtr secret;
-        }
-
-
         static readonly ItemData[] empty_item_data = new ItemData[0];
 
         public static ItemData[] Find(ItemType type, Hashtable atts)
@@ -510,11 +527,11 @@ namespace Gnome.Keyring
 
             IntPtr[] passwordStructs = Marshaller.ListPtrToArray<IntPtr>(passwordList, typeof(GLib.List), false, false);
 
-            List<GnomeKeyringFound> passwords = new List<GnomeKeyringFound>();
+            List<LibGnomeImports.GnomeKeyringFound> passwords = new List<LibGnomeImports.GnomeKeyringFound>();
 
             foreach (IntPtr ptr in passwordStructs)
             {
-                passwords.Add((GnomeKeyringFound)Marshal.PtrToStructure(ptr, typeof(GnomeKeyringFound)));
+                passwords.Add((LibGnomeImports.GnomeKeyringFound)Marshal.PtrToStructure(ptr, typeof(LibGnomeImports.GnomeKeyringFound)));
             }
 
             ArrayList list = new ArrayList();
@@ -536,23 +553,6 @@ namespace Gnome.Keyring
             return (ItemData[])list.ToArray(typeof(ItemData));
         }
 
-        [StructLayout(LayoutKind.Sequential)]
-        struct GnomeKeyringNetworkPasswordData
-        {
-            public IntPtr keyring;
-            public UInt32 item_id;
-
-            public IntPtr protocol;
-            public IntPtr server;
-            public IntPtr @object;
-            public IntPtr authtype;
-            public UInt32 port;
-
-            public IntPtr user;
-            public IntPtr domain;
-            public IntPtr password;
-        }
-
         static readonly NetItemData[] empty_net_item_data = new NetItemData[0];
         public static NetItemData[] FindNetworkPassword(string user, string domain, string server, string obj,
                                     string protocol, string authtype, int port)
@@ -570,11 +570,11 @@ namespace Gnome.Keyring
             }
 
             IntPtr[] passwordStructs = Marshaller.ListPtrToArray<IntPtr>(passwordList, typeof(GLib.List), false, false);
-            List<GnomeKeyringNetworkPasswordData> passwords = new List<GnomeKeyringNetworkPasswordData>();
+            List<LibGnomeImports.GnomeKeyringNetworkPasswordData> passwords = new List<LibGnomeImports.GnomeKeyringNetworkPasswordData>();
 
             foreach (IntPtr ptr in passwordStructs)
             {
-                passwords.Add((GnomeKeyringNetworkPasswordData)Marshal.PtrToStructure(ptr, typeof(GnomeKeyringNetworkPasswordData)));
+                passwords.Add((LibGnomeImports.GnomeKeyringNetworkPasswordData)Marshal.PtrToStructure(ptr, typeof(LibGnomeImports.GnomeKeyringNetworkPasswordData)));
             }
 
             ArrayList list = new ArrayList();
